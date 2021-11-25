@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html>
+    <head>
+        <title>Fottery</title>
+        <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.js"/>
+        <script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"/>
+        <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
+        <link rel="stylesheet" type="text/css" href="assets/screen4.css" media="screen"/>
+        <script type="text/javascript" src="jscripts/controls.js"/>
+        <script type="text/javascript" src="jscripts/basics.js"/>
+        <script type="text/javascript" src="jscripts/functions.js"/>
+        <script type="text/javascript" src="jscripts/gcode.js"/>
+        <script type="text/javascript" src="jscripts/profiles.js"/>
+        <script type="text/javascript" src="jscripts/print_profiles.js"/>
+        <script type="text/javascript" src="jscripts/fottery.js"/>
+        <link href="assets/icon-64-64.png" rel="icon" sizes="64x64" />
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+     </head>
+    <body>
+        <h1>
+            <a href="index.html">Index</a>&#160;>&#160;<a href="?">Fottery</a>&#160; 
+            <span>
+                <button class="main" id="but0" onClick="tab(0)">Object</button>
+            </span>&#160;<span>
+                <button class="main" id="but1" onClick="tab(1)">
+                    Layers</button>
+            </span>&#160; <span>
+                <button class="main" id="but2" onClick="tab(2)">Printer</button>
+            </span>&#160; <span>
+                <button class="main" id="but3" onClick="tab(3)">Help</button>
+            </span>&#160; </h1>
+        <div class="tab" id="tab0" style="display:none">
+            <div class="left">
+                <table>
+                    <tr>
+                        <th>Start 
+                        </th>
+                        <td>
+                            <button onclick="reset()">Clear design</button>
+                            &#160;
+                           
+                            <span class="tooltip">
+                                <img src="assets/Info_Symbol.png" width="10px"/>
+                                <span class="tooltiptext">A saved design can be restored from a
+                                    local file created by the export below.</span>
+                            </span>
+                            <input type="file" id="design_file"/>
+                            <button onclick="load_design()">Load</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Name</th>
+                        <td>
+                            <input type="text" id="design_name" size="10" value="Mydesign"/>&#160;
+                            
+                            <button onclick="download_design()">Export</button>
+                            <span class="tooltip">
+                                <img src="assets/Info_Symbol.png" width="10px"/>
+                                <span class="tooltiptext">Export the design to a local file.</span>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Height of object</th>
+                        <td>
+                            <input type="text" size="3" id="height" value="20"/> mm
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Overall Scale<span class="tooltip">
+                                <img src="assets/Info_Symbol.png" width="10px"/>
+                                <span class="tooltiptext">This is a % scaling of the whole
+                                    object.</span>
+                            </span>
+                        </th>
+                        <td>
+                            <input type="text" id="scale_factor" value="100" size="3"/>%
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Stepsize <span class="tooltip">
+                                <img src="assets/Info_Symbol.png" width="10px"/>
+                                <span class="tooltiptext">This overrides the step set on the layers. </span>
+                            </span>
+                        </th>
+                        <td>
+                            <input type="text" id="design_stepsize" size="3"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Equalize <span class="tooltip">
+                                <img src="assets/Info_Symbol.png" width="10px"/>
+                                <span class="tooltiptext">Most mathematic functions generate points
+                                    evenly spaced in degrees but with very uneven lengths of steps
+                                    along the curve and very small steps slow printing. This mode
+                                    reconstructs the curve with equal length steps.</span>
+                            </span>
+                        </th>
+                        <td>
+                            <input type="checkbox" id="equalize" checked="checked"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Bottom Layer</th>
+                        <td>
+                            <span id="role_0_summary"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Top Layer</th>
+                        <td>
+                            Set same as bottom <input type="checkbox" id="top_as_bottom"/>
+                            <br/>
+                            <span id="role_1_summary"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Layer Profile</th>
+                        <td>
+                            Mode <span class="tooltip">
+                                <img src="assets/Info_Symbol.png" width="10px"/>
+                                <span class="tooltiptext">Interpolation between top and bottom
+                                    layers can either be done by interpolating the points of the
+                                    layers pair-wise, point to point, or if both are defined by the
+                                    same function, by interpolating between the values of the
+                                    parameters which define the curve. Points mode requires the
+                                    number of steps to be equal.</span>
+                            </span>
+                            <select id="interpolation_mode">
+                                <option value="parametric" selected="selected">Parametric</option>
+                                <option value="points">Point by point </option>
+                            </select><br/>
+                            Profile <span class="tooltip">
+                                <img src="assets/Info_Symbol.png" width="10px"/>
+                                <span class="tooltiptext">This function determines the profile of
+                                    interpolation between bottom and top parameters or points</span>
+                            </span>
+                            <div id="easing_selector_layer"/>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Scale profile <span class="tooltip">
+                                <img src="assets/Info_Symbol.png" width="10px"/>
+                                <span class="tooltiptext">This function determines the profile of
+                                    interpolation between bottom and top scales.</span>
+                            </span>
+                        </th>
+                        <td>
+                            <div id="easing_selector_scale"/>
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Rotation profile <span class="tooltip">
+                                <img src="assets/Info_Symbol.png" width="10px"/>
+                                <span class="tooltiptext">This function determines the shape of
+                                    interpolation between bottom and top rotation</span>
+                            </span>
+                        </th>
+                        <td>
+                            <div id="easing_selector_rotate"/>
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Gcode</th>
+                        
+                        <td>
+                            <button onClick="make_gcode()"> Generate</button>
+                            &#160;
+                            <button id="b-gcode" onclick="hide_show('gcode')">Show</button>
+                            &#160;
+                            <button onClick="download_gcode()">Download </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Summary</th>
+                        <td>
+                            <div id="print_result"/>
+                            
+                        </td>
+                    </tr>                    
+                    
+                </table>
+                <div id="div-gcode" style="display:none;">
+                    <pre id="gcode" />
+                </div> 
+            </div>
+        </div>
+        <div class="tab" id="tab1">
+            <div id="left">
+                <table>
+                    <tr>
+                        <th>Selected layer <span class="tooltip">
+                                <img src="assets/Info_Symbol.png" width="10px"/>
+                                <span class="tooltiptext">Click on either button to create or edit
+                                that layer of the design. Beside each is shown the number of points in the layer and whether it is a closed layer <b>O</b>  or open <b>|</b>
+                                </span>
+                            </span>
+                        </th>
+                        <td>
+                            <span style="background-color:salmon; ">
+                                <input type="radio" id="role_0" name="role" value="0" onchange="change_role()">Bottom</input>
+                            </span>
+                            <button onclick="clear_role(0)">X</button> &#160;<span id="role_0_data"/> &#160; <br/>
+                            <span style="background-color:skyblue; ">
+                                <input type="radio" id="role_1" name="role" value="1" onchange="change_role()">&#160;&#160;Top&#160;&#160;&#160;&#160;</input>
+                            </span>
+                            <button onclick="clear_role(1)">X</button> &#160;<span id="role_1_data"/> &#160;
+                            <button onClick="swap_roles()">swap</button>&#160;
+                           
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Type <span class="tooltip">
+                                <img src="assets/Info_Symbol.png" width="10px"/>
+                                <span class="tooltiptext">Select one of the supported ways to create
+                                the curve.</span>
+                            </span>
+                        </th>
+                        <td>
+                            <select id="type" size="3" onchange="set_type()">
+                                <option value="function">function : select one
+                                    of the library of functions</option>
+                                <option value="fourier">fourier : input a Fourier spectrum</option>
+                                <option value="points">points : input a sequence of points </option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tbody id="function_selector"/>
+                    <tbody id="type_parameters"/>
+                    <tbody id="path_parameters"/>
+                </table>
+            </div>
+            <div id="svgframe">
+                <svg xmlns="http://www.w3.org/2000/svg" id="svgimage" width="800" height="800">
+                    <g id="canvas" transform="translate(50,20)"/>
+                </svg>
+            </div>
+        </div>
+        <div class="tab" id="tab2" style="display:none">
+            <div>For guidance in the use and meaning of GCodes, see this listing of <a target="_blank" class="external" href="https://marlinfw.org/docs/gcode/G000-G001.html">Marlin codes</a>
+            </div>
+            <table>
+                <tr>
+                    <th>Printer Properties <span class="tooltip">
+                        <img src="assets/Info_Symbol.png" width="10px"/>
+                        <span class="tooltiptext">Set form a default or load from a saved local file</span>
+                       </span>
+                        
+                    </th>
+                    <td><button onclick="set_print_profile('PLA')">PLA</button>
+                        &#160;
+                        <button onclick="set_print_profile('Clay')">Clay</button>
+                        &#160;
+                        Local File <span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">Load a local set of printer properties which
+                                have been exported. </span>
+                        </span>
+                        <input type="file" id="print_file"/>
+                        <button onclick="load_print()">Load</button>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Name</th>
+                    <td>
+                        <input type="text" size="10" id="print_name" value=""/>
+                        &#160;
+                        <button onclick="download_print()">
+                            
+                            Export</button>
+                        <span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">Export the current printer propertries to a
+                                local file.</span>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Description
+                    <span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">Description of this set of printer properties</span>
+                        </span>
+                    </th>
+                    <td>
+                        <textarea id="print_description" cols="50" rows="3"/>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Bed dimensions</th>
+                    <td>Width <input type="text" id="bed_width" size="3" /> mm , Height
+                            <input type="text" id="bed_height" size="3" /> mm
+                    </td>
+                </tr>
+                <tr>
+                    <th>Z offset <span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">Offset of the initial layer from the printer bed (to support printing on a clay base)</span>
+                        </span>
+                    </th>
+                    <td>
+                        <input type="text" id="z_offset" size="5" /> mm
+                    </td>
+                </tr>
+                <tr>
+                    <th>Filament</th>
+                    <td>Filament diameter 
+                        <span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">Diameter of the feedstock filament </span>
+                        </span>
+                        <input type="text" id="filament_diameter" size="3" /> mm  &#160;
+                        Density  <span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">Density of the feedstock filament in grams per cubic centimeter - used to computer weight of print </span>
+                        </span>
+                        <input type="text" size="4" id="filament_density" />
+                        gm/cm^3</td>
+                </tr>
+                <tr>
+                    <th>Extruder
+                        <span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">The extrusion rate is computed from the filament diameter and the height and width of the layer </span>
+                        </span>
+                    </th>
+                    <td>
+                    Nozzle_diameter <span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">Diameter of the extruder nozzle. Future use for print problem detection. </span>
+                        </span>
+                        <input type="text" id="nozzle_diameter" size="3"/>
+                        &#160;Extrusion multiplier: 
+                        <span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">To increase or decrease the computed rate of extrusion. </span>
+                        </span>
+                        <input type="text" size="3" id="extrusion_multiplier" />
+                    </td>
+                </tr>
+                <tr>
+                    <th>Feed rate<span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">Base feed rate - ie rate of movement of the extruder in mm/sec </span>
+                        </span>
+                    </th>
+                    <td>
+                        <input type="text" size="3" id="feed_rate" />  mm/sec
+                    </td>
+                </tr>
+                <tr>
+                    <th>Layers</th>
+                    <td> Bottom Layer height <input type="text" size="3" id="bottom_layer_height" /> mm.  Other Layers height <input type="text" size="3" id="layer_height" /> mm.
+                    &#160;Layer width<span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">The width of a layer</span>
+                        </span>
+                        <input type="text" size="3" id="wall_width" />
+                    </td>
+                </tr>
+                <tr>
+                    <th>Spiraling
+                        <span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">There is always a centre perimeter which spirals
+                                continuously upwards. 'Vase' mode in some slicers.  </span>
+                        </span></th>
+                    <td>   
+ <!--                       Spiral walls <span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">Spiral inner walls (TBD) </span>
+                        </span>
+                        <input type="checkbox" id="spiral_walls"/>&#160;
+ -->                       
+                        Interpolate between layers  <span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">Interpolated between adjacent central wall layers to get a better spiral.  Requires equal points in all layers.</span>
+                        </span>
+                        <input type="checkbox" id="continuous" />
+                    </td>
+                </tr>
+                <tr>
+                    <th>Perimeters <span class="tooltip">
+                        <img src="assets/Info_Symbol.png" width="10px"/>
+                        <span class="tooltiptext">There is always a centre perimeter which spirals
+                            upwards. Additional perimeters can added either inside or outside this
+                            central perimeter to provide more strength. Such perimeters are printed at a
+                            constant height. If there are changes in the direction of curvature
+                            (Lissajous curves do this), it is better to add 1 perimeter each side
+                            than two perimeters on one side. </span>
+                    </span>
+                    </th>
+                    <td>Perimeter separation <span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">Separation between perimeters.  Probably set to less than the layer width. </span>
+                        </span>
+                        <input type="text" id="wall_separation" size="3" />
+                        
+                        &#160;Inner: 
+                        <input type="text" id="n_inner_walls" size="3"/>
+                        &#160;Outer:  <input type="text" id="n_outer_walls" size="3" />
+                    </td>
+                </tr>
+                <tr>
+                    <th>Skirt
+                       <span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">Print a skirt around the object to ensure filament flow is steady before printing the object.
+                            </span>
+                        </span>
+                    </th>
+                    <td>
+                        Number of skirts   
+                        <span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">Number of skirts.</span>
+                        </span>
+                        <input type="text" size="3" id="skirt_n" />
+                        &#160;
+                        Skirt offset
+                        
+                        <span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">Offset to the skirt from the bounding box of the bottom layer. </span>
+                        </span> 
+                        <input type="text" size="3" id="skirt_offset" /> mm 
+                        </td>
+                </tr>
+                <tr>
+                    <th>Align start<span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">Align the start point of extrusion to be
+                                nearest the bed origin.</span>
+                        </span>
+                    </th>
+                    <td>
+                        <input type="checkbox" id="align_start" />
+                    </td>
+                </tr>
+                <tr>
+                    <th>Prologue</th>
+                    <td>
+                        <textarea id="prologue" cols="60" rows="10"/>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Epilog</th>
+                    <td>
+                        <textarea id="epilogue" cols="60" rows="5"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="tab" id="tab3" style="display:none">
+            <h3>Purpose</h3>
+            <div>To design 3-D objects and generate the G-code to print the object. Currently the objects are restricted to shells with no solid layers or infill.</div>
+            <h3>Motivation</h3>
+            <div>I now have a clay print, a Eazao Zero. My previous work has been based on
+                OpenSCAD to STL to Gcode but I'm aware that printing in clay requires more control
+                over the generated G-code as well as offering more freedom than the route via STL can
+                provide. Since my interest is in mathematically defined shapes, I was keen to
+                see if I could generate the G-code directly from functions. Hence the name: <b>Fottery </b> is short for <b>Functions to Pottery</b>. Whilst testing the tool
+                with PLA on my current printer, I realised that objects created with a single
+                continuous filament have a strength and integrity which would be useful for plastic
+                objects as well.</div>
+            <div>It has now been sucessfully used to created designs in clay - more in 
+                <a class="external" target="_blank" href="https://kitwallace.tumblr.com/tagged/clay">my blog</a>.</div>
+            <h3>Help</h3>
+            <div>Help is available on each of the inputs to the design on the <span class="tooltip">
+                    <img src="assets/Info_Symbol.png" width="10px"/>
+                    <span class="tooltiptext">Help and explanations here.</span> icons.
+            </span>
+            </div>
+            <h3>Usage</h3>
+            <ul>
+                <li>Click <b>Object</b> to define the properties of the whole 3-D object and
+                    generate G-code for a 3-D printed form. </li>
+                <li>Controls here set the way that interpolation between bottom and top paths are computed, which by default is linear.</li>
+                <li>Object designs can be saved and loaded from local files.</li>
+                <li>Click <b>Layers</b> to create curves to define the bottom and top layers
+                    of the object. Curves can be created by mathematical functions, from a sequence of
+                    points or from the Fourier spectrum of the curve.</li>
+                <li>The sliders adjust the parameters of the curve. You can also enter values in the
+                    value fields directly to override the sliders. </li>
+                <li>The resolution of the computed curve can be adjusted with the Step size
+                    parameter. </li>
+                <li>Other controls allow the curve to be moved and rotated.</li>
+                <li>To generate the code, on the Object tab, click <b>Generate G-code</b> which shows the Gcode
+                    (minus the prologue and epilogue ) on the screen.  A summary of the print such as length of filament and time to print is provided. If it looks ok, click
+                        <b>Download G-code</b> to save the complete G-code file which can then be loaded
+                    into a printer controller such as Prontoface or saved to an SD card.</li>
+                <li>Click <b>Printer</b> to set properties such as filament
+                    characteristics, layer height, wall construction, skirt etc.</li>
+                <li>Print Properties can also be saved and loaded from local files. The default set are for PLA on my Prusa</li>
+            </ul>
+            <h3>Limitations </h3>
+            <div>
+                <ul>
+                    <li>To visualise the object, you need to generate and load the gcode into another tool like Prontoface or Repetier. It would be nice if this visualistion was part of this program.</li>
+                    <li>It doesn't make infill, even to make the base.  For clay the advice seems to be that it's better to make a solid clay base to print the perimeters on. </li>
+                    <li>It's not been tested by anyone but me.</li>
+                    <li>The code has grown to nearly 2500 lines of JavaScript and no doubt is buggy.</li>
+                    <li>Some control interactions are awkward.</li>
+                    <li>There are no facilities for adding texture to the object. </li>
+                    
+                </ul>
+            </div>
+            <h3>Improvements</h3>
+              <div> I've no desire to make a general slicer but there are a few additions I want to make:
+                <ul>
+                    
+                    <li>The vertical profile of the object can be varied by the Profile functions which determine the interpolation between layers and this can be expanded.
+                        It should be possible to use a more general profile, derived from an arbitary path.</li>
+                    <li>Only top and bottom layers are definable. Multiple key layers would provide more possibilities.</li>
+                    <li>The support tools such as Fractal and DFT need work</li>
+                    <li>I'd love to be able to slice a polyhedron </li>              
+                </ul>
+                
+            </div>
+            <h3>Development</h3>
+            <div>This script was developed by <a href="http://kitwallace.co.uk">Kit Wallace</a>. 
+                <!-- Code is on <a href="https://github.com/KitWallace/Fottery">GitHub</a>. -->
+            </div>
+        </div>
+    </body>
+</html>
