@@ -1,0 +1,96 @@
+
+body {
+    background-color: #fefbd8;
+    color: #411;
+    margin-left:5%;
+    margin-right:5%;
+
+}
+
+a {text-decoration:none;}
+ 
+img {padding:5px;}
+
+a.external {
+    background-image: url('../assets/Icon_External_Link.png');
+    padding-right: 12px;
+    text-decoration: none;
+    background-position: right;
+    background-repeat:no-repeat;
+}
+
+#svgframe {position:absolute; left:55%; top:50px;}
+
+#left {position:absolute; left:2%;right:55%; top:100px;}
+
+
+h1,h2,h3,h4 {
+    clear : both;
+}
+
+:hover {
+    color:red;
+}
+
+
+.slider {
+    background-color: #00bb00;
+}
+.pslider {
+    background-color: #0000bb;
+}
+.cslider {
+    background-color: #00bbbb;
+}
+
+.checkbox {padding:3px; border: 1px solid black;}
+
+.main {padding:15px;font-size:large;}
+
+th {text-align: left;}
+/* Tooltip container */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 200px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+
+  /* Position the tooltip text */
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+
+  /* Fade in tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Tooltip arrow */
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 30%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+  z-index: 99;
+}
