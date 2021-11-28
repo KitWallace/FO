@@ -4,6 +4,16 @@
   based on Functional objects
 */
 
+/* 
+ * needs to use the modulation_list 
+ * and a new selector a la easing 
+ * modulations are functions of two variables t the height of the objcet frm 0 to 1, and the disatnce along the path from 0 to 1
+ * 
+ */
+var toClass = function(obj,proto) {
+               obj.__proto__ = proto;
+               return obj;
+}
 
 //functions to support fourier rep
 
@@ -28,6 +38,17 @@ function fourier_representation(t,params) {
 		}
 	return [round(s*X,4),-round(s*Y,4)];
 	}
+
+function make_design_selector() {
+   var html="<table>";
+  
+   design_list.forEach((d) => {
+       var click = 'load_sample_design("' + d.name + '")';
+       html+="<tr><td><button onclick='"+click+"'>"+d.name+"</button></td><td>"+d.description+"</td></tr>";
+       });
+   html+= "</table>";
+   $('#design_selector').html(html);
+}
 
 var myDesign ;
 var gcode;
@@ -141,31 +162,8 @@ function make_function_sliders(path) {
            });
 }
 
-// easings
 
-function easing_named(name) {
-  var index = easing_list.findIndex(function(f,i) {if (f.fname==name) return true;});
-  if (index != -1)
-      return easing_list[index];
-  else false;
-}
 
-function make_easing_selector(mode) {
-    var onchange = 'set_easing_function("'+mode+'")';
-    var html="<div>";
-    html+="<select id='easing_"+mode+"' onchange='"+onchange+"'>";
-    easing_list.forEach((f) => {
-       html+="<option value='"+f.fname+"'>" + f.name + "</option>";
-       });
-    html+= "</select><div id='easing_parameters_"+mode+"'/>";
-    html+="</div>";
-    $('#easing_selector_'+mode).html(html);
-}
-
-function set_easing_function(mode) {
-    var easing= new Easing(mode);
-    easing.to_UI();
-}
 
 // fourier defined paths
 function make_fourier_parameters(path) {
@@ -195,7 +193,7 @@ function make_points_parameters(path) {
    html+="<tr><th>Description</th><td>An array of points in json format as output from, for example the <a class='external' target='_blank' href='../FO/Fractal2.html'>Fractal</a> tool.</td></tr>";
    html+="<tr><th title='Points'>Points</th><td width='45%'><textarea id='data_points' cols='50' rows='6' onchange='refresh()'>"+JSON.stringify(path.data_points)+"</textarea></td></tr>";
    html+="<tr><th>Properties</th><td width='45%'> Number of steps <input type='text' id='steps' size='3' value='"+path.dsteps+"' onchange='refresh()'/>" +
-   "Equalize "+tooltip("Equalize the points")+"<input type='checkbox' id='points_equalize' onchange='refresh()' "+ s+ "/></td></tr>";
+   "Equalize "+tooltip("Equalize the points by dividing the path into N equal length segments. Polar funcations are computed with equal steps in the angle but this does not produce equal length steps along the curve")+"<input type='checkbox' id='points_equalize' onchange='refresh()' "+ s+ "/></td></tr>";
    
    html+="<tr><th/><td width='45%'><button onclick='refresh()'>Refresh</button></td></tr>";
 
@@ -337,7 +335,7 @@ function reset() {
      $('#type').val("function");    
      myDesign = new Design();
      myDesign.to_UI();
- // laters page
+ // layers page
      $('#role_0').prop('checked',true);
      make_function_selector(); 
      clear_html('function_parameters');
@@ -354,11 +352,13 @@ function reset() {
      make_easing_selector("layer");
      make_easing_selector("scale");
      make_easing_selector("rotate");
+     make_modulation_selector("peri");
      
      clear_html('print_result');
      clear_html('gcode');
      myDesign.to_UI();
- 
+ // samples page
+     make_design_selector();
 }
 
 function refresh(k) {  
@@ -469,6 +469,32 @@ function function_to_points(fn,params,stepsize,maxcycles,allcycles) {
     return f;
 }
 
+// easings
+
+function easing_named(name) {
+  var index = easing_list.findIndex(function(f,i) {if (f.fname==name) return true;});
+  if (index != -1)
+      return easing_list[index];
+  else false;
+}
+
+function make_easing_selector(mode) {
+    var onchange = 'set_easing_function("'+mode+'")';
+    var html="<div>";
+    html+="<select id='easing_"+mode+"' onchange='"+onchange+"'>";
+    easing_list.forEach((f) => {
+       html+="<option value='"+f.fname+"'>" + f.name + "</option>";
+       });
+    html+= "</select><div id='easing_parameters_"+mode+"'/>";
+    html+="</div>";
+    $('#easing_selector_'+mode).html(html);
+}
+
+function set_easing_function(mode) {
+    var easing= new Easing(mode);
+    easing.to_UI();
+}
+
 class Easing {
       mode;
       fname;
@@ -499,6 +525,7 @@ class Easing {
       make_easing_parameters() {
         var html="<div>";
         if (this.f.description) html+=tooltip(this.f.description);
+        if (this.f.link) html += "&#160; <a href='"+this.f.link+"'> more </a>";
         if (this.f.parameters.length >0) {
             var onchange = 'set_easing("'+this.mode+'")';
             for (var i = 0;i < this.params.length;i++) {
@@ -521,6 +548,93 @@ class Easing {
       to_UI() {
           $('#easing_'+this.mode).val(this.fname);
           this.make_easing_parameters();
+      }
+      
+      val(t) {
+         return this.fn(t,this.params);
+      }
+}
+
+// modulations
+function modulation_named(name) {
+  var index = modulation_list.findIndex(function(f,i) {if (f.fname==name) return true;});
+  if (index != -1)
+      return modulation_list[index];
+  else false;
+}
+
+function make_modulation_selector(mode) {
+    var onchange = 'set_modulation_function("'+mode+'")';
+    var html="<div>";
+    html+="<select id='modulation_"+mode+"' onchange='"+onchange+"'>";
+    modulation_list.forEach((f) => {
+       html+="<option value='"+f.fname+"'>" + f.name + "</option>";
+       });
+    html+= "</select><div id='modulation_parameters_"+mode+"'/>";
+    html+="</div>";
+    $('#modulation_selector_'+mode).html(html);
+    console.log(html);
+}
+
+function set_modulation_function(mode) {
+    var modulation= new Modulation(mode);
+    modulation.to_UI();
+    console.log(modulation);
+}
+
+class Modulation {
+      mode;
+      fname;
+      f;
+      fn;
+      params; 
+      constructor(mode,fname) {
+          this.mode=mode;
+          if (fname)
+             this.fname=fname;
+          else 
+             this.fname = $('#modulation_'+mode).val();
+          this.f = modulation_named(this.fname);
+          this.fn=window[this.fname]; 
+          this.params=[]; 
+          for (var i = 0;i < this.f.parameters.length;i++) {
+               this.params.push(this.f.parameters[i].initial)
+          }
+       }
+      deconstruct() {
+          this.f=undefined;
+          this.fn=undefined;
+      }
+      reconstruct() {
+          this.f = modulation_named(this.fname);
+          this.fn=window[this.fname];  
+      }
+      make_modulation_parameters() {
+        var html="<div>";
+        if (this.f.description) html+=tooltip(this.f.description);
+        if (this.f.link) html += "&#160; <a href='"+this.f.link+"'> more </a>";
+        if (this.f.parameters.length >0) {
+            var onchange = 'set_modulation("'+this.mode+'")';
+            for (var i = 0;i < this.params.length;i++) {
+               var p =  this.f.parameters[i];
+               var pv = this.params[i];
+               var tip = p.description ? tooltip(p.description) : "";
+               html+="<span>&#160;"+p.name+tip+"<input type='text' size='3' id='modulation_param_"+this.mode+i+"' value='"+pv+"' /></span>";
+            }
+         }
+         html+="</div>";
+         $('#modulation_parameters_'+this.mode).html(html);
+      }
+     
+      from_UI() {
+          this.params=[];
+          for (var i=0;i<this.f.parameters.length;i++) {
+                this.params.push(parseFloat($('#modulation_param_'+this.mode+i).val())); 
+          }
+      }
+      to_UI() {
+          $('#modulation_'+this.mode).val(this.fname);
+          this.make_modulation_parameters();
       }
       
       val(t) {
@@ -816,7 +930,7 @@ class Path {
           else if (this.type =="fourier")
                html+=" no. of components = " + this.params.length ;
           else if (this.type =="points");
-          html+=" width: " + round(this.width,2) + "mm, height: "+round(this.height,2) +"mm<br/>";
+          html+=" width: " + round(this.width,2) + "mm, height: "+round(this.height,2) + "mm<br/>";
 
           html+="</div>";
           return html;
@@ -831,6 +945,7 @@ var Roles = [
 
 class Design {
      name;
+     description;
      paths;
      height;
      stepsize;
@@ -840,16 +955,19 @@ class Design {
      layer_easing;
      scale_easing;
      rotate_easing;
+     peri_modulation;
      equalize;
      
      constructor () {
          this.paths= [undefined,undefined];
          this.name= "Mydesign";
+         this.description="";
          this.height=20;
          this.stepsize=0;
          this.scale_factor=100;
          this.top_as_bottom = false;
          this.interpolation_mode="parametric";
+         this.peri_modulation = new Modulation("peri","modulate_none");
          this.layer_easing = new Easing ("layer","ease_linear");
          this.scale_easing = new Easing ("scale","ease_linear");
          this.rotate_easing = new Easing ("rotate","ease_linear");
@@ -861,13 +979,15 @@ class Design {
          this.paths[1].deconstruct();
          this.layer_easing.deconstruct(); 
          this.scale_easing.deconstruct(); 
-         this.rotate_easing.deconstruct(); 
+         this.rotate_easing.deconstruct();
+         this.peri_modulation.deconstruct();
      }
      reconstruct()  { 
          for (var i =0;i<this.paths.length;i++) this.paths[i].reconstruct();
          this.layer_easing.reconstruct(); 
          this.scale_easing.reconstruct(); 
          this.rotate_easing.reconstruct();
+         this.peri_modulation.reconstruct();
      }
 
      set_path(i,path) {
@@ -879,6 +999,7 @@ class Design {
 
      from_UI() {  
         this.name= $('#design_name').val();
+        this.description =$('#design_description').val();
         this.height = parseFloat($('#height').val());
         this.top_as_bottom = $('#top_as_bottom').is(":checked");       
         this.stepsize = parseFloat($('#design_stepsize').val());      
@@ -889,12 +1010,15 @@ class Design {
         this.scale_easing = new Easing('scale');  
         this.scale_easing.from_UI();         
         this.rotate_easing = new Easing('rotate');
-        this.rotate_easing.from_UI();         
+        this.rotate_easing.from_UI();  
+        this.peri_modulation = new Modulation('peri');
+        this.peri_modulation.from_UI();
         this.equalize = $('#equalize').is(':checked');
      }
      
      to_UI() {
         $('#design_name').val( this.name);
+        $('#design_description').val(this.description);
         $('#height').val(this.height); 
         $('#top_as_bottom').prop('checked',this.top_as_bottom);
         $('#design_stepsize').val(this.stepsize);
@@ -903,6 +1027,7 @@ class Design {
         this.layer_easing.to_UI();
         this.scale_easing.to_UI();
         this.rotate_easing.to_UI();
+        this.peri_modulation.to_UI();
         if (this.paths[0]) this.paths[0].to_UI();
         for (var i =0;i<this.paths.length;i++)  if (this.paths[i]) this.paths[i].report(i);
         set_role(0);
@@ -954,6 +1079,11 @@ class Design {
           if (translate != [0,0]) {
               layer= path_translate(layer,translate);
           } 
+          
+          if (this.peri_modulation.fname != "modulate_none") {
+              layer = path_offset_function(layer,this.peri_modulation.fn,t,this.peri_modulation.params);
+          }
+          
           if (this.scale_factor != 100)
               layer=path_scale(layer , this.scale_factor/100);
           if (frompc !=0 || topc !=100  && frompc < topc) {
@@ -1113,7 +1243,7 @@ class Gcode {
        html+="<tr><th>Interpolation mode </th><td>" + this.design.interpolation_mode + "</td></tr>";
        html+="<tr><th>Extrusion Rate </th><td>" + round(this.print.extrusion_rate,5) + "</td></tr>";
        html+="<tr><th>No of layers </th><td>" + this.n_layers + "</td></tr>";
-       html+="<tr><th>Path length</th><td>"+ round(this.length,0) +"mm </td></tr>";
+       html+="<tr><th>Path length</th><td>"+ round(this.length,0) +" mm </td></tr>";
        html+="<tr><th>Filament length</th><td>" + round(this.filament_length,1) + " mm </td></tr>";
        html+="<tr><th>Filament weight</th><td>" + round(this.filament_weight,2) + " gm </td></tr>";
        html+="<tr><th>Estimated Time</th><td>" + round(this.estimated_minutes,2) + " minutes </td></tr>";
@@ -1308,6 +1438,7 @@ function make_gcode() {
     var print = new Print();
     print.from_UI();
     gcode = new Gcode(design,print);
+    console.log(gcode);
     gcode.generate_gcode();
     $('#print_result').html(gcode.as_HTML());
     $('#gcode').text(gcode.code);
@@ -1438,6 +1569,7 @@ function load_design() {
             toClass(design.layer_easing,Easing.prototype);
             toClass(design.scale_easing,Easing.prototype);
             toClass(design.rotate_easing,Easing.prototype);
+            toClass(design.peri_modulation,Modulation.prototype);
 
             design.reconstruct();
             myDesign = design; 
@@ -1449,6 +1581,34 @@ function load_design() {
 	    });
         reader.readAsText(file);
      }
+}
+function design_named(fname) {
+  var index = design_list.findIndex(function(f,i) {if (f.name==fname) return true;});
+  if (index != -1)
+      return design_list[index];
+  else false;
+}
+
+function load_sample_design(name) {
+    var design_json = design_named(name);
+    var design = toClass(design_json,Design.prototype);
+    for (var i =0;i<design.paths.length;i++) {
+               p = design.paths[i];
+               p = toClass(p,Path.prototype);
+    }
+           
+    toClass(design.layer_easing,Easing.prototype);
+    toClass(design.scale_easing,Easing.prototype);
+    toClass(design.rotate_easing,Easing.prototype);
+    if (design.peri_modulation)
+        toClass(design.peri_modulation,Modulation.prototype);
+    else 
+        design.peri_modulation = new Modulation("peri","modulate_none");
+    design.reconstruct();
+    myDesign = design; 
+    myDesign.to_UI();
+    refresh();   
+    tab(0);
 }
 
 $(document).ready(function(){
