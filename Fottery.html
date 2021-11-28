@@ -5,30 +5,39 @@
         <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.js"/>
         <script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"/>
         <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
-        <link rel="stylesheet" type="text/css" href="assets/screen.css" media="screen"/>
+        <link rel="stylesheet" type="text/css" href="assets/screen4.css" media="screen"/>
         <script type="text/javascript" src="jscripts/controls.js"/>
         <script type="text/javascript" src="jscripts/basics.js"/>
         <script type="text/javascript" src="jscripts/functions.js"/>
         <script type="text/javascript" src="jscripts/gcode.js"/>
-        <script type="text/javascript" src="jscripts/profiles.js"/>
+        <script type="text/javascript" src="jscripts/profiles.js"/> 
+        <script type="text/javascript" src="jscripts/modulations.js"/>  
         <script type="text/javascript" src="jscripts/print_profiles.js"/>
+        <script type="text/javascript" src="jscripts/designs.js"/>
         <script type="text/javascript" src="jscripts/fottery.js"/>
-        <link href="assets/icon-64-64.png" rel="icon" sizes="64x64" />
+        <link href="assets/icon-64-64.png" rel="icon" sizes="64x64"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
-     </head>
+    </head>
     <body>
         <h1>
-            <a href="index.html">Index</a>&#160;>&#160;<a href="?">Fottery</a>&#160; 
+            <a href="index.html">Index</a>&#160;:&#160;<a href="?">Fottery</a>&#160; 
             <span>
                 <button class="main" id="but0" onClick="tab(0)">Object</button>
-            </span>&#160;<span>
+            </span>&#160;
+            <span>
                 <button class="main" id="but1" onClick="tab(1)">
                     Layers</button>
-            </span>&#160; <span>
+            </span>&#160; 
+            <span>
                 <button class="main" id="but2" onClick="tab(2)">Printer</button>
-            </span>&#160; <span>
+            </span>&#160;
+            <span>
                 <button class="main" id="but3" onClick="tab(3)">Help</button>
-            </span>&#160; </h1>
+            </span>&#160; 
+            <span>
+                <button class="main" id="but4" onClick="tab(4)">Sample Designs</button>
+            </span>&#160;
+        </h1>
         <div class="tab" id="tab0" style="display:none">
             <div class="left">
                 <table>
@@ -49,15 +58,14 @@
                         </td>
                     </tr>
                     <tr>
-                        <th>Name</th>
+                        <th>Save design <span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">Export the design to a local file.</span>
+                        </span>
+                        </th>
                         <td>
-                            <input type="text" id="design_name" size="10" value="Mydesign"/>&#160;
-                            
-                            <button onclick="download_design()">Export</button>
-                            <span class="tooltip">
-                                <img src="assets/Info_Symbol.png" width="10px"/>
-                                <span class="tooltiptext">Export the design to a local file.</span>
-                            </span>
+                            Name <input type="text" id="design_name" size="10" value="Mydesign"/>&#160; <button onclick="download_design()">Export</button><br/>
+                            Description <textarea id="design_description" cols="50"  rows="2"/>                           
                         </td>
                     </tr>
                     <tr>
@@ -129,14 +137,14 @@
                             <select id="interpolation_mode">
                                 <option value="parametric" selected="selected">Parametric</option>
                                 <option value="points">Point by point </option>
-                            </select><br/>
+                            </select>
+                            <br/>
                             Profile <span class="tooltip">
                                 <img src="assets/Info_Symbol.png" width="10px"/>
                                 <span class="tooltiptext">This function determines the profile of
                                     interpolation between bottom and top parameters or points</span>
                             </span>
                             <div id="easing_selector_layer"/>
-
                         </td>
                     </tr>
                     <tr>
@@ -148,7 +156,6 @@
                         </th>
                         <td>
                             <div id="easing_selector_scale"/>
-                            
                         </td>
                     </tr>
                     <tr>
@@ -160,12 +167,20 @@
                         </th>
                         <td>
                             <div id="easing_selector_rotate"/>
-                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Perimeter modulation <span class="tooltip">
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">This function modulates the perimeter with a function of two variables: x around the perimeter and y up the height </span>
+                        </span>
+                        </th>
+                        <td>
+                            <div id="modulation_selector_peri"/>
                         </td>
                     </tr>
                     <tr>
                         <th>Gcode</th>
-                        
                         <td>
                             <button onClick="make_gcode()"> Generate</button>
                             &#160;
@@ -178,14 +193,12 @@
                         <th>Summary</th>
                         <td>
                             <div id="print_result"/>
-                            
                         </td>
-                    </tr>                    
-                    
+                    </tr>
                 </table>
                 <div id="div-gcode" style="display:none;">
-                    <pre id="gcode" />
-                </div> 
+                    <pre id="gcode"/>
+                </div>
             </div>
         </div>
         <div class="tab" id="tab1">
@@ -222,10 +235,9 @@
                         </th>
                         <td>
                             <select id="type" size="3" onchange="set_type()">
-                                <option value="function">function : select one
-                                    of the library of functions</option>
-                                <option value="fourier">fourier : input a Fourier spectrum</option>
-                                <option value="points">points : input a sequence of points </option>
+                                <option value="function"> select a parametric function</option>
+                                <option value="fourier"> input a Fourier spectrum</option>
+                                <option value="points"> input a sequence of points </option>
                             </select>
                         </td>
                     </tr>
@@ -246,12 +258,12 @@
             <table>
                 <tr>
                     <th>Printer Properties <span class="tooltip">
-                        <img src="assets/Info_Symbol.png" width="10px"/>
-                        <span class="tooltiptext">Set form a default or load from a saved local file</span>
-                       </span>
-                        
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">Set form a default or load from a saved local file</span>
+                        </span>
                     </th>
-                    <td><button onclick="set_print_profile('PLA')">PLA</button>
+                    <td>
+                        <button onclick="set_print_profile('PLA')">PLA</button>
                         &#160;
                         <button onclick="set_print_profile('Clay')">Clay</button>
                         &#160;
@@ -292,8 +304,8 @@
                 </tr>
                 <tr>
                     <th>Bed dimensions</th>
-                    <td>Width <input type="text" id="bed_width" size="3" /> mm , Height
-                            <input type="text" id="bed_height" size="3" /> mm
+                    <td>Width <input type="text" id="bed_width" size="3"/> mm , Height
+                            <input type="text" id="bed_height" size="3"/> mm
                     </td>
                 </tr>
                 <tr>
@@ -303,7 +315,7 @@
                         </span>
                     </th>
                     <td>
-                        <input type="text" id="z_offset" size="5" /> mm
+                        <input type="text" id="z_offset" size="5"/> mm
                     </td>
                 </tr>
                 <tr>
@@ -313,12 +325,12 @@
                             <img src="assets/Info_Symbol.png" width="10px"/>
                             <span class="tooltiptext">Diameter of the feedstock filament </span>
                         </span>
-                        <input type="text" id="filament_diameter" size="3" /> mm  &#160;
+                        <input type="text" id="filament_diameter" size="3"/> mm  &#160;
                         Density  <span class="tooltip">
                             <img src="assets/Info_Symbol.png" width="10px"/>
                             <span class="tooltiptext">Density of the feedstock filament in grams per cubic centimeter - used to computer weight of print </span>
                         </span>
-                        <input type="text" size="4" id="filament_density" />
+                        <input type="text" size="4" id="filament_density"/>
                         gm/cm^3</td>
                 </tr>
                 <tr>
@@ -339,7 +351,7 @@
                             <img src="assets/Info_Symbol.png" width="10px"/>
                             <span class="tooltiptext">To increase or decrease the computed rate of extrusion. </span>
                         </span>
-                        <input type="text" size="3" id="extrusion_multiplier" />
+                        <input type="text" size="3" id="extrusion_multiplier"/>
                     </td>
                 </tr>
                 <tr>
@@ -349,17 +361,17 @@
                         </span>
                     </th>
                     <td>
-                        <input type="text" size="3" id="feed_rate" />  mm/sec
+                        <input type="text" size="3" id="feed_rate"/>  mm/sec
                     </td>
                 </tr>
                 <tr>
                     <th>Layers</th>
-                    <td> Bottom Layer height <input type="text" size="3" id="bottom_layer_height" /> mm.  Other Layers height <input type="text" size="3" id="layer_height" /> mm.
+                    <td> Bottom Layer height <input type="text" size="3" id="bottom_layer_height"/> mm.  Other Layers height <input type="text" size="3" id="layer_height"/> mm.
                     &#160;Layer width<span class="tooltip">
                             <img src="assets/Info_Symbol.png" width="10px"/>
                             <span class="tooltiptext">The width of a layer</span>
                         </span>
-                        <input type="text" size="3" id="wall_width" />
+                        <input type="text" size="3" id="wall_width"/>
                     </td>
                 </tr>
                 <tr>
@@ -368,41 +380,41 @@
                             <img src="assets/Info_Symbol.png" width="10px"/>
                             <span class="tooltiptext">There is always a centre perimeter which spirals
                                 continuously upwards. 'Vase' mode in some slicers.  </span>
-                        </span></th>
-                    <td>   
- <!--                       Spiral walls <span class="tooltip">
+                        </span>
+                    </th>
+                    <td><!--                       Spiral walls <span class="tooltip">
                             <img src="assets/Info_Symbol.png" width="10px"/>
                             <span class="tooltiptext">Spiral inner walls (TBD) </span>
                         </span>
-                        <input type="checkbox" id="spiral_walls"/>&#160;
+                        <input type="checkbox" id="spiral_walls"/> 
  -->                       
                         Interpolate between layers  <span class="tooltip">
                             <img src="assets/Info_Symbol.png" width="10px"/>
                             <span class="tooltiptext">Interpolated between adjacent central wall layers to get a better spiral.  Requires equal points in all layers.</span>
                         </span>
-                        <input type="checkbox" id="continuous" />
+                        <input type="checkbox" id="continuous"/>
                     </td>
                 </tr>
                 <tr>
                     <th>Perimeters <span class="tooltip">
-                        <img src="assets/Info_Symbol.png" width="10px"/>
-                        <span class="tooltiptext">There is always a centre perimeter which spirals
+                            <img src="assets/Info_Symbol.png" width="10px"/>
+                            <span class="tooltiptext">There is always a centre perimeter which spirals
                             upwards. Additional perimeters can added either inside or outside this
                             central perimeter to provide more strength. Such perimeters are printed at a
                             constant height. If there are changes in the direction of curvature
                             (Lissajous curves do this), it is better to add 1 perimeter each side
                             than two perimeters on one side. </span>
-                    </span>
+                        </span>
                     </th>
                     <td>Perimeter separation <span class="tooltip">
                             <img src="assets/Info_Symbol.png" width="10px"/>
                             <span class="tooltiptext">Separation between perimeters.  Probably set to less than the layer width. </span>
                         </span>
-                        <input type="text" id="wall_separation" size="3" />
+                        <input type="text" id="wall_separation" size="3"/>
                         
                         &#160;Inner: 
                         <input type="text" id="n_inner_walls" size="3"/>
-                        &#160;Outer:  <input type="text" id="n_outer_walls" size="3" />
+                        &#160;Outer:  <input type="text" id="n_outer_walls" size="3"/>
                     </td>
                 </tr>
                 <tr>
@@ -419,15 +431,15 @@
                             <img src="assets/Info_Symbol.png" width="10px"/>
                             <span class="tooltiptext">Number of skirts.</span>
                         </span>
-                        <input type="text" size="3" id="skirt_n" />
+                        <input type="text" size="3" id="skirt_n"/>
                         &#160;
                         Skirt offset
                         
                         <span class="tooltip">
                             <img src="assets/Info_Symbol.png" width="10px"/>
                             <span class="tooltiptext">Offset to the skirt from the bounding box of the bottom layer. </span>
-                        </span> 
-                        <input type="text" size="3" id="skirt_offset" /> mm 
+                        </span>
+                        <input type="text" size="3" id="skirt_offset"/> mm 
                         </td>
                 </tr>
                 <tr>
@@ -438,7 +450,7 @@
                         </span>
                     </th>
                     <td>
-                        <input type="checkbox" id="align_start" />
+                        <input type="checkbox" id="align_start"/>
                     </td>
                 </tr>
                 <tr>
@@ -477,9 +489,11 @@
             </div>
             <h3>Usage</h3>
             <ul>
+                <li>The Sample designs provide some basic designs whhich illustrate some of the possibilities.</li>
                 <li>Click <b>Object</b> to define the properties of the whole 3-D object and
                     generate G-code for a 3-D printed form. </li>
-                <li>Controls here set the way that interpolation between bottom and top paths are computed, which by default is linear.</li>
+                <li>Controls here set the way that interpolation between bottom and top paths are computed, which by default is linear .</li>
+                <li>The Modulation control allows the perimeter to be modulated.</li>
                 <li>Object designs can be saved and loaded from local files.</li>
                 <li>Click <b>Layers</b> to create curves to define the bottom and top layers
                     of the object. Curves can be created by mathematical functions, from a sequence of
@@ -501,30 +515,36 @@
             <div>
                 <ul>
                     <li>To visualise the object, you need to generate and load the gcode into another tool like Prontoface or Repetier. It would be nice if this visualistion was part of this program.</li>
+                    <li>The shape of the profiles are not displayed</li>
+                    <li>The range of profile and modlation functions is limited and will hopefully be expanded with user contributions</li>
                     <li>It doesn't make infill, even to make the base.  For clay the advice seems to be that it's better to make a solid clay base to print the perimeters on. </li>
                     <li>It's not been tested by anyone but me.</li>
-                    <li>The code has grown to nearly 2500 lines of JavaScript and no doubt is buggy.</li>
+                    <li>The code has grown to nearly 2500 lines of JavaScript and certainly is buggy.</li>
                     <li>Some control interactions are awkward.</li>
                     <li>There are no facilities for adding texture to the object. </li>
-                    
                 </ul>
             </div>
             <h3>Improvements</h3>
-              <div> I've no desire to make a general slicer but there are a few additions I want to make:
+            <div>I've no desire to make a general slicer but there are a few additions I want to make:
                 <ul>
-                    
                     <li>The vertical profile of the object can be varied by the Profile functions which determine the interpolation between layers and this can be expanded.
                         It should be possible to use a more general profile, derived from an arbitary path.</li>
+                    <li>Surface textures are needed</li>
                     <li>Only top and bottom layers are definable. Multiple key layers would provide more possibilities.</li>
                     <li>The support tools such as Fractal and DFT need work</li>
-                    <li>I'd love to be able to slice a polyhedron </li>              
+                    <li>I'd love to be able to slice a polyhedron </li>
                 </ul>
-                
             </div>
             <h3>Development</h3>
             <div>This script was developed by <a href="http://kitwallace.co.uk">Kit Wallace</a>. 
-                <!-- Code is on <a href="https://github.com/KitWallace/Fottery">GitHub</a>. -->
+                Code is on <a href="https://github.com/KitWallace/FO">GitHub</a>.
             </div>
         </div>
+        <div class="tab" id="tab4" style="display:none">
+            <h3>Sample designs</h3>
+            <div>Sample designs which illustrate some of the features of the tool and can be used as given or modified to create new designs. These are sized for test printing in PLA and need to be resized for Clay printing.</div>
+             <div id="design_selector"/>
+        </div>   
+            
     </body>
 </html>
