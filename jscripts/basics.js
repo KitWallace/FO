@@ -268,6 +268,28 @@ function path_offset(path,d) {
    return ipath; 
 }
 
+function path_offset_function(path,fn,y,p) {
+// needs a bit of tidying  and optimisation -  mixture of rads and degrees
+   var ipath= [];
+   for (var i= 0 ; i < path.length;i++) {
+       var iprev = (i - 1 + path.length) % path.length;
+       var inext = (i + 1 ) % path.length;
+       var vp= unitv(point_diff(path[i],path[iprev]));
+       var vn= unitv(point_diff(path[inext],path[i]));
+       var a=  Math.PI - angle_between(vn,vp);
+       var vd = unitv(point_add(vp,vn));
+       var vm = [-vd[1],vd[0]];
+       if (a > 0)
+           vm = point_mult(vm,-1);
+       var x = i/(path.length-1);
+       var d = fn(x,y,p);
+       var offset = d / Math.sin(a/2);
+       var offset_v = point_mult(vm,offset);
+       var offset_p = point_add(path[i],offset_v);
+       ipath.push(offset_p);     
+   }
+   return ipath; 
+}
 function path_min(path) {
     var min = 1000;
     var i_min =0;
